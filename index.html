@@ -1,507 +1,1046 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infrastructure Node Viewer</title>
-
-    <style>
-        :root {
-            --bg: #f4f6f8;
-            --card: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --border: #dfe3e8;
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --hover: #f8fafc;
-            --tab-bg: #e9eef5;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Helvetica,
-                Arial,
-                sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        .app {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        /* ========================================================
-           Header
-           ======================================================== */
-
-        .header {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-            box-shadow: var(--shadow);
-            margin-bottom: 18px;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .title {
-            margin: 0;
-            font-size: 26px;
-            font-weight: 650;
-        }
-
-        .subtitle {
-            margin-top: 5px;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .file-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-name {
-            color: var(--muted);
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        button {
-            border: none;
-            border-radius: 7px;
-            padding: 9px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-        .primary-button {
-            background: var(--primary);
-            color: white;
-        }
-
-        .primary-button:hover {
-            background: var(--primary-dark);
-        }
-
-        .secondary-button {
-            background: #eef2f7;
-            color: var(--text);
-        }
-
-        .secondary-button:hover {
-            background: #e2e8f0;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        /* ========================================================
-           Status
-           ======================================================== */
-
-        .status {
-            margin-top: 14px;
-            padding: 9px 12px;
-            border-radius: 6px;
-            background: #f8fafc;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .status.success {
-            background: #f0fdf4;
-            color: #166534;
-        }
-
-        .status.error {
-            background: #fef2f2;
-            color: #991b1b;
-        }
-
-        /* ========================================================
-           Tabs
-           ======================================================== */
-
-        .tabs-container {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 12px;
-            margin-bottom: 18px;
-        }
-
-        .tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 7px;
-        }
-
-        .tab {
-            background: var(--tab-bg);
-            color: #475569;
-            border-radius: 7px;
-            padding: 9px 14px;
-            cursor: pointer;
-            font-size: 14px;
-            border: 1px solid transparent;
-        }
-
-        .tab:hover {
-            background: #dde5ef;
-        }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .tab-count {
-            margin-left: 5px;
-            opacity: 0.75;
-        }
-
-        /* ========================================================
-           Main Content
-           ======================================================== */
-
-        .content {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 18px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .search-container {
-            flex: 1;
-            max-width: 600px;
-        }
-
-        .search {
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            padding: 10px 13px;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .search:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-
-        .result-count {
-            color: var(--muted);
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        /* ========================================================
-           Table
-           ======================================================== */
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-        }
-
-        th {
-            background: #f8fafc;
-            color: #475569;
-            font-size: 12px;
-            font-weight: 650;
-            text-align: left;
-            padding: 11px 14px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            white-space: nowrap;
-            user-select: none;
-        }
-
-        th:hover {
-            background: #f1f5f9;
-        }
-
-        td {
-            padding: 12px 14px;
-            border-bottom: 1px solid #edf0f3;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-        tbody tr {
-            cursor: pointer;
-            transition: background 0.1s ease;
-        }
-
-        tbody tr:hover {
-            background: var(--hover);
-        }
-
-        .node-name {
-            font-weight: 600;
-            color: #1e40af;
-        }
-
-        .ip-address {
-            font-family:
-                ui-monospace,
-                SFMono-Regular,
-                Menlo,
-                Monaco,
-                Consolas,
-                monospace;
-            font-size: 13px;
-        }
-
-        /*
-         * Clickable IP address
-         */
-
-        .ip-link {
-            color: #2563eb;
-            text-decoration: none;
-            font-family:
-                ui-monospace,
-                SFMono-Regular,
-                Menlo,
-                Monaco,
-                Consolas,
-                monospace;
-            font-size: 13px;
-        }
-
-        .ip-link:hover {
-            color: #1d4ed8;
-            text-decoration: underline;
-        }
-
-        .type-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: #e8eefc;
-            color: #1d4ed8;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .empty {
-            padding: 60px 20px;
-            text-align: center;
-            color: var(--muted);
-        }
-
-        .empty-title {
-            font-size: 18px;
-            color: var(--text);
-            margin-bottom: 7px;
-        }
-
-        .empty-text {
-            font-size: 14px;
-        }
-
-        /* ========================================================
-           Modal
-           ======================================================== */
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.45);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal {
-            width: min(650px, 100%);
-            max-height: 85vh;
-            overflow-y: auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .modal-title {
-            margin: 0;
-            font-size: 20px;
-        }
-
-        .close-button {
-            background: transparent;
-            color: var(--muted);
-            font-size: 22px;
-            padding: 3px 8px;
-        }
-
-        .close-button:hover {
-            background: #f1f5f9;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .detail-label,
-        .detail-value {
-            padding: 11px 13px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .detail-label {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .detail-value {
-            overflow-wrap: anywhere;
-        }
-
-        .detail-grid > :nth-last-child(-n+2) {
-            border-bottom: none;
-        }
-
-        /* ========================================================
-           Drop Zone
-           ======================================================== */
-
-        .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 9px;
-            margin: 15px 18px;
-            padding: 25px;
-            text-align: center;
-            color: var(--muted);
-            transition: all 0.15s ease;
-        }
-
-        .drop-zone.drag-over {
-            border-color: var(--primary);
-            background: #eff6ff;
-            color: var(--primary);
-        }
-
-        .drop-zone strong {
-            color: var(--text);
-        }
-
-        /* ========================================================
-           Responsive
-           ======================================================== */
-
-        @media (max-width: 750px) {
-
-            .app {
-                padding: 12px;
-            }
-
-            .header-top {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .file-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-container {
-                max-width: none;
-            }
-
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .detail-label {
-                border-bottom: none;
-                padding-bottom: 4px;
-            }
-
-            .detail-value {
-                padding-top: 4px;
-            }
-        }
-    </style>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Infrastructure Node Viewer</title>
+
+
+<style>
+
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+
+:root {
+
+    --bg: #f3f5f8;
+
+    --card: #ffffff;
+
+    --text: #1f2937;
+
+    --muted: #6b7280;
+
+    --border: #dfe4ea;
+
+    --primary: #2563eb;
+
+    --primary-dark: #1d4ed8;
+
+    --tab-bg: #e8edf4;
+
+    --hover: #f8fafc;
+
+    --green: #16a34a;
+
+    --green-bg: #dcfce7;
+
+    --yellow: #ca8a04;
+
+    --yellow-bg: #fef9c3;
+
+    --red: #dc2626;
+
+    --red-bg: #fee2e2;
+
+    --gray: #64748b;
+
+    --gray-bg: #f1f5f9;
+
+    --shadow:
+        0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+
+    margin: 0;
+
+    padding: 0;
+
+    width: 100%;
+
+    min-height: 100%;
+
+}
+
+
+body {
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    background: var(--bg);
+
+    color: var(--text);
+}
+
+
+button,
+input {
+
+    font-family: inherit;
+
+}
+
+
+button {
+
+    cursor: pointer;
+
+}
+
+
+/* ============================================================
+   APPLICATION
+   ============================================================ */
+
+.app {
+
+    max-width: 1900px;
+
+    margin: 0 auto;
+
+    padding: 24px;
+
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.header {
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 20px 24px;
+
+    box-shadow: var(--shadow);
+
+    margin-bottom: 18px;
+
+}
+
+
+.header-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+}
+
+
+.title {
+
+    margin: 0;
+
+    font-size: 26px;
+
+    font-weight: 650;
+
+}
+
+
+.subtitle {
+
+    margin-top: 5px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+}
+
+
+.file-controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.file-name {
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    max-width: 300px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+.primary-button {
+
+    display: inline-block;
+
+    background: var(--primary);
+
+    color: white;
+
+    border-radius: 7px;
+
+    padding: 9px 15px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    user-select: none;
+
+}
+
+
+.primary-button:hover {
+
+    background: var(--primary-dark);
+
+}
+
+
+input[type="file"] {
+
+    display: none;
+
+}
+
+
+/* ============================================================
+   STATUS MESSAGE
+   ============================================================ */
+
+.status {
+
+    margin-top: 14px;
+
+    padding: 9px 12px;
+
+    border-radius: 6px;
+
+    background: #f8fafc;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+}
+
+
+.status.success {
+
+    background: #f0fdf4;
+
+    color: #166534;
+
+}
+
+
+.status.error {
+
+    background: #fef2f2;
+
+    color: #991b1b;
+
+}
+
+
+/* ============================================================
+   TABS
+   ============================================================ */
+
+.tabs-container {
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow);
+
+    padding: 12px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.tabs {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+}
+
+
+.tab {
+
+    background: var(--tab-bg);
+
+    color: #475569;
+
+    border: 1px solid transparent;
+
+    border-radius: 7px;
+
+    padding: 9px 14px;
+
+    font-size: 14px;
+
+}
+
+
+.tab:hover {
+
+    background: #dce4ee;
+
+}
+
+
+.tab.active {
+
+    background: var(--primary);
+
+    color: white;
+
+}
+
+
+.tab-count {
+
+    margin-left: 5px;
+
+    opacity: 0.75;
+
+}
+
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+
+.content {
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+
+}
+
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+.toolbar {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 15px 18px;
+
+    border-bottom: 1px solid var(--border);
+
+}
+
+
+.search-container {
+
+    flex: 1;
+
+    max-width: 900px;
+
+}
+
+
+.search {
+
+    width: 100%;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+
+    padding: 10px 13px;
+
+    font-size: 14px;
+
+    outline: none;
+
+}
+
+
+.search:focus {
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 2px
+        rgba(37, 99, 235, 0.1);
+
+}
+
+
+.result-count {
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   DROP ZONE
+   ============================================================ */
+
+.drop-zone {
+
+    border: 2px dashed #cbd5e1;
+
+    border-radius: 9px;
+
+    margin: 15px 18px;
+
+    padding: 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    transition: all 0.15s ease;
+
+}
+
+
+.drop-zone.drag-over {
+
+    border-color: var(--primary);
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+.table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+table {
+
+    width: 100%;
+
+    min-width: 1450px;
+
+    border-collapse: collapse;
+
+}
+
+
+th {
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    font-weight: 650;
+
+    text-align: left;
+
+    padding: 11px 14px;
+
+    border-bottom: 1px solid var(--border);
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    user-select: none;
+
+}
+
+
+th:hover {
+
+    background: #eef2f7;
+
+}
+
+
+td {
+
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #edf0f3;
+
+    font-size: 14px;
+
+    vertical-align: middle;
+
+}
+
+
+tbody tr {
+
+    cursor: pointer;
+
+    transition: background 0.1s ease;
+
+}
+
+
+tbody tr:hover {
+
+    background: var(--hover);
+
+}
+
+
+/* ============================================================
+   NAME
+   ============================================================ */
+
+.node-name {
+
+    font-weight: 600;
+
+    color: #1e40af;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   IP ADDRESS
+   ============================================================ */
+
+.ip-address {
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+}
+
+
+.ip-link {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+}
+
+
+.ip-link:hover {
+
+    color: #1d4ed8;
+
+    text-decoration: underline;
+
+}
+
+
+.no-ip {
+
+    color: #94a3b8;
+
+}
+
+
+/* ============================================================
+   TYPE
+   ============================================================ */
+
+.type-badge {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    background: #e8eefc;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+.status-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+
+}
+
+
+.status-online {
+
+    color: #166534;
+
+    background: var(--green-bg);
+
+}
+
+
+.status-online .status-dot {
+
+    background: var(--green);
+
+}
+
+
+.status-warning {
+
+    color: #854d0e;
+
+    background: var(--yellow-bg);
+
+}
+
+
+.status-warning .status-dot {
+
+    background: var(--yellow);
+
+}
+
+
+.status-offline {
+
+    color: #991b1b;
+
+    background: var(--red-bg);
+
+}
+
+
+.status-offline .status-dot {
+
+    background: var(--red);
+
+}
+
+
+.status-unknown {
+
+    color: #475569;
+
+    background: var(--gray-bg);
+
+}
+
+
+.status-unknown .status-dot {
+
+    background: var(--gray);
+
+}
+
+
+/* ============================================================
+   SERIAL
+   ============================================================ */
+
+.serial {
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.empty {
+
+    padding: 60px 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+}
+
+
+.empty-title {
+
+    font-size: 18px;
+
+    color: var(--text);
+
+    margin-bottom: 7px;
+
+}
+
+
+.empty-text {
+
+    font-size: 14px;
+
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.modal-overlay {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(15, 23, 42, 0.45);
+
+    z-index: 1000;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+}
+
+
+.modal-overlay.show {
+
+    display: flex;
+
+}
+
+
+.modal {
+
+    width: min(850px, 100%);
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0, 0, 0, 0.2);
+
+}
+
+
+.modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid var(--border);
+
+}
+
+
+.modal-title {
+
+    margin: 0;
+
+    font-size: 20px;
+
+}
+
+
+.close-button {
+
+    background: transparent;
+
+    color: var(--muted);
+
+    border: none;
+
+    font-size: 22px;
+
+    padding: 3px 8px;
+
+}
+
+
+.close-button:hover {
+
+    background: #f1f5f9;
+
+}
+
+
+.modal-body {
+
+    padding: 20px;
+
+}
+
+
+.detail-grid {
+
+    display: grid;
+
+    grid-template-columns: 170px 1fr;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+}
+
+
+.detail-label,
+.detail-value {
+
+    padding: 11px 13px;
+
+    border-bottom: 1px solid var(--border);
+
+}
+
+
+.detail-label {
+
+    background: #f8fafc;
+
+    font-weight: 600;
+
+    color: #475569;
+
+}
+
+
+.detail-value {
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .app {
+
+        padding: 12px;
+
+    }
+
+
+    .header-top {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .file-controls {
+
+        width: 100%;
+
+        justify-content: space-between;
+
+    }
+
+
+    .toolbar {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .search-container {
+
+        max-width: none;
+
+    }
+
+
+    .detail-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .detail-label {
+
+        border-bottom: none;
+
+        padding-bottom: 4px;
+
+    }
+
+
+    .detail-value {
+
+        padding-top: 4px;
+
+    }
+
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
+
     <!-- ========================================================
-         Header
+         HEADER
          ======================================================== -->
 
     <div class="header">
@@ -509,14 +1048,17 @@
         <div class="header-top">
 
             <div>
+
                 <h1 class="title">
                     Infrastructure Node Viewer
                 </h1>
 
                 <div class="subtitle">
-                    Offline node inventory viewer
+                    Offline infrastructure node inventory
                 </div>
+
             </div>
+
 
             <div class="file-controls">
 
@@ -527,10 +1069,9 @@
                     Loading nodes.csv...
                 </span>
 
-                <label
-                    class="primary-button"
-                    style="padding: 9px 15px; cursor: pointer;"
-                >
+
+                <label class="primary-button">
+
                     Choose CSV
 
                     <input
@@ -538,11 +1079,13 @@
                         id="fileInput"
                         accept=".csv,text/csv"
                     >
+
                 </label>
 
             </div>
 
         </div>
+
 
         <div
             id="status"
@@ -555,7 +1098,7 @@
 
 
     <!-- ========================================================
-         Tabs
+         TABS
          ======================================================== -->
 
     <div class="tabs-container">
@@ -569,10 +1112,11 @@
 
 
     <!-- ========================================================
-         Main Content
+         CONTENT
          ======================================================== -->
 
     <div class="content">
+
 
         <div class="toolbar">
 
@@ -580,17 +1124,18 @@
 
                 <input
                     type="search"
-                    class="search"
                     id="searchInput"
-                    placeholder="Search node name, IP address, description, type..."
+                    class="search"
+                    placeholder="Search name, IP, type, rack, location, status, description, serial..."
                     autocomplete="off"
                 >
 
             </div>
 
+
             <div
-                class="result-count"
                 id="resultCount"
+                class="result-count"
             >
                 0 nodes
             </div>
@@ -598,23 +1143,35 @@
         </div>
 
 
-        <!-- Drag and Drop -->
+        <!-- ====================================================
+             DROP ZONE
+             ==================================================== -->
 
         <div
-            class="drop-zone"
             id="dropZone"
+            class="drop-zone"
         >
-            <strong>Drop a CSV file here</strong>
+
+            <strong>
+                Drop a CSV file here
+            </strong>
+
             <br>
-            or use the <strong>Choose CSV</strong> button above
+
+            or click
+            <strong>Choose CSV</strong>
+            above
+
         </div>
 
 
-        <!-- Table -->
+        <!-- ====================================================
+             TABLE
+             ==================================================== -->
 
         <div
-            class="table-wrapper"
             id="tableContainer"
+            class="table-wrapper"
         >
 
             <div class="empty">
@@ -624,8 +1181,12 @@
                 </div>
 
                 <div class="empty-text">
-                    Place <strong>nodes.csv</strong> beside this HTML
-                    file, or choose a CSV file above.
+
+                    Put
+                    <strong>nodes.csv</strong>
+                    beside this HTML file,
+                    or choose a CSV file.
+
                 </div>
 
             </div>
@@ -638,28 +1199,30 @@
 
 
 <!-- ============================================================
-     Node Details Modal
+     NODE DETAILS MODAL
      ============================================================ -->
 
 <div
-    class="modal-overlay"
     id="modalOverlay"
+    class="modal-overlay"
 >
 
     <div class="modal">
 
+
         <div class="modal-header">
 
             <h2
-                class="modal-title"
                 id="modalTitle"
+                class="modal-title"
             >
                 Node Details
             </h2>
 
+
             <button
-                class="close-button"
                 id="closeModal"
+                class="close-button"
                 title="Close"
             >
                 ×
@@ -667,11 +1230,12 @@
 
         </div>
 
+
         <div class="modal-body">
 
             <div
-                class="detail-grid"
                 id="detailGrid"
+                class="detail-grid"
             ></div>
 
         </div>
@@ -683,823 +1247,831 @@
 
 <script>
 
-    /*
-     * ============================================================
-     * Infrastructure Node Viewer
-     * ============================================================
-     *
-     * Default CSV:
-     *
-     *     nodes.csv
-     *
-     * Expected basic columns:
-     *
-     *     name
-     *     ip
-     *     description
-     *     type
-     *
-     * Additional CSV columns are supported automatically.
-     *
-     * No external libraries are required.
-     *
-     * IP addresses are clickable and open:
-     *
-     *     http://<IP>
-     *
-     * in a new browser tab.
-     * ============================================================
-     */
+/* ============================================================
+   APPLICATION STATE
+   ============================================================ */
+
+let nodes = [];
+
+let currentTab = "all";
+
+let searchText = "";
+
+let sortColumn = null;
+
+let sortDirection = "asc";
 
 
-    // ============================================================
-    // Application state
-    // ============================================================
+/* ============================================================
+   REQUIRED CSV COLUMNS
+   ============================================================ */
 
-    let nodes = [];
+const REQUIRED_COLUMNS = [
 
-    let currentTab = "all";
+    "name",
 
-    let searchText = "";
+    "internal-ip",
 
-    let sortColumn = null;
+    "ipmi-ip",
 
-    let sortDirection = "asc";
+    "mgmt-ip",
 
+    "type",
 
-    // ============================================================
-    // DOM references
-    // ============================================================
+    "rack",
 
-    const fileInput =
-        document.getElementById("fileInput");
+    "location",
 
-    const fileName =
-        document.getElementById("fileName");
+    "status",
 
-    const status =
-        document.getElementById("status");
+    "description",
 
-    const tabs =
-        document.getElementById("tabs");
+    "serial"
 
-    const searchInput =
-        document.getElementById("searchInput");
-
-    const resultCount =
-        document.getElementById("resultCount");
-
-    const tableContainer =
-        document.getElementById("tableContainer");
-
-    const dropZone =
-        document.getElementById("dropZone");
-
-    const modalOverlay =
-        document.getElementById("modalOverlay");
-
-    const closeModal =
-        document.getElementById("closeModal");
-
-    const modalTitle =
-        document.getElementById("modalTitle");
-
-    const detailGrid =
-        document.getElementById("detailGrid");
+];
 
 
-    // ============================================================
-    // Initialize
-    // ============================================================
+/* ============================================================
+   DOM REFERENCES
+   ============================================================ */
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
-
-            loadDefaultCSV();
-
-        }
+const fileInput =
+    document.getElementById(
+        "fileInput"
     );
 
 
-    // ============================================================
-    // Load default nodes.csv
-    // ============================================================
+const fileName =
+    document.getElementById(
+        "fileName"
+    );
 
-    async function loadDefaultCSV() {
 
-        try {
+const statusElement =
+    document.getElementById(
+        "status"
+    );
 
-            const response =
-                await fetch(
-                    "nodes.csv",
-                    {
-                        cache: "no-store"
-                    }
-                );
 
-            if (!response.ok) {
+const tabs =
+    document.getElementById(
+        "tabs"
+    );
 
-                throw new Error(
-                    "nodes.csv could not be loaded."
-                );
 
-            }
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
 
-            const text =
-                await response.text();
 
-            processCSV(
-                text,
-                "nodes.csv"
+const resultCount =
+    document.getElementById(
+        "resultCount"
+    );
+
+
+const tableContainer =
+    document.getElementById(
+        "tableContainer"
+    );
+
+
+const dropZone =
+    document.getElementById(
+        "dropZone"
+    );
+
+
+const modalOverlay =
+    document.getElementById(
+        "modalOverlay"
+    );
+
+
+const closeModal =
+    document.getElementById(
+        "closeModal"
+    );
+
+
+const modalTitle =
+    document.getElementById(
+        "modalTitle"
+    );
+
+
+const detailGrid =
+    document.getElementById(
+        "detailGrid"
+    );
+
+
+/* ============================================================
+   STARTUP
+   ============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadDefaultCSV();
+
+    }
+);
+
+
+/* ============================================================
+   DEFAULT CSV
+   ============================================================ */
+
+async function loadDefaultCSV() {
+
+    try {
+
+        const response =
+            await fetch(
+                "nodes.csv",
+                {
+                    cache: "no-store"
+                }
             );
 
-        } catch (error) {
 
-            console.warn(
-                "Default CSV could not be loaded:",
-                error
-            );
+        if (!response.ok) {
 
-            fileName.textContent =
-                "No default CSV loaded";
-
-            setStatus(
-                "Default nodes.csv was not found. Choose a CSV file to continue.",
-                "error"
+            throw new Error(
+                "nodes.csv could not be loaded"
             );
 
         }
+
+
+        const text =
+            await response.text();
+
+
+        processCSV(
+            text,
+            "nodes.csv"
+        );
+
+
+    } catch (error) {
+
+        console.warn(
+            error
+        );
+
+
+        fileName.textContent =
+            "No default CSV loaded";
+
+
+        setStatus(
+            "nodes.csv was not found. Choose a CSV file to continue.",
+            "error"
+        );
 
     }
 
-
-    // ============================================================
-    // File selection
-    // ============================================================
-
-    fileInput.addEventListener(
-        "change",
-        event => {
-
-            const file =
-                event.target.files[0];
-
-            if (!file) {
-                return;
-            }
-
-            readFile(file);
-
-        }
-    );
+}
 
 
-    // ============================================================
-    // Read selected CSV
-    // ============================================================
+/* ============================================================
+   FILE SELECTION
+   ============================================================ */
 
-    function readFile(file) {
+fileInput.addEventListener(
+    "change",
+    event => {
 
-        if (
-            !file.name
-                .toLowerCase()
-                .endsWith(".csv")
-        ) {
+        const file =
+            event.target.files[0];
 
-            setStatus(
-                "Please select a CSV file.",
-                "error"
-            );
+
+        if (!file) {
 
             return;
 
         }
 
 
-        const reader =
-            new FileReader();
+        readCSVFile(file);
+
+    }
+);
 
 
-        reader.onload =
-            event => {
+function readCSVFile(file) {
 
-                processCSV(
-                    event.target.result,
-                    file.name
-                );
+    if (
+        !file.name
+            .toLowerCase()
+            .endsWith(".csv")
+    ) {
 
-            };
+        setStatus(
+            "Please select a CSV file.",
+            "error"
+        );
 
-
-        reader.onerror =
-            () => {
-
-                setStatus(
-                    "Unable to read the selected file.",
-                    "error"
-                );
-
-            };
-
-
-        reader.readAsText(file);
+        return;
 
     }
 
 
-    // ============================================================
-    // Drag & Drop
-    // ============================================================
-
-    [
-        "dragenter",
-        "dragover"
-    ].forEach(
-        eventName => {
-
-            dropZone.addEventListener(
-                eventName,
-                event => {
-
-                    event.preventDefault();
-
-                    dropZone.classList.add(
-                        "drag-over"
-                    );
-
-                }
-            );
-
-        }
-    );
+    const reader =
+        new FileReader();
 
 
-    [
-        "dragleave",
-        "drop"
-    ].forEach(
-        eventName => {
-
-            dropZone.addEventListener(
-                eventName,
-                event => {
-
-                    event.preventDefault();
-
-                    dropZone.classList.remove(
-                        "drag-over"
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    dropZone.addEventListener(
-        "drop",
+    reader.onload =
         event => {
 
-            const files =
-                event.dataTransfer.files;
-
-            if (!files.length) {
-                return;
-            }
-
-            readFile(files[0]);
-
-        }
-    );
-
-
-    // ============================================================
-    // Process CSV
-    // ============================================================
-
-    function processCSV(
-        text,
-        sourceName
-    ) {
-
-        try {
-
-            const rows =
-                parseCSV(text);
-
-
-            if (!rows.length) {
-
-                throw new Error(
-                    "CSV contains no data."
-                );
-
-            }
-
-
-            const headers =
-                rows[0].map(
-                    header =>
-                        header.trim()
-                );
-
-
-            if (!headers.length) {
-
-                throw new Error(
-                    "CSV header is missing."
-                );
-
-            }
-
-
-            nodes = [];
-
-
-            for (
-                let i = 1;
-                i < rows.length;
-                i++
-            ) {
-
-                const row =
-                    rows[i];
-
-
-                if (
-                    row.every(
-                        value =>
-                            String(value).trim() === ""
-                    )
-                ) {
-
-                    continue;
-
-                }
-
-
-                const node = {};
-
-
-                headers.forEach(
-                    (
-                        header,
-                        index
-                    ) => {
-
-                        node[header] =
-                            row[index] !== undefined
-                                ? row[index].trim()
-                                : "";
-
-                    }
-                );
-
-
-                nodes.push(node);
-
-            }
-
-
-            // Reset view
-
-            currentTab = "all";
-
-            searchText = "";
-
-            searchInput.value = "";
-
-            sortColumn = null;
-
-            sortDirection = "asc";
-
-
-            fileName.textContent =
-                sourceName;
-
-
-            setStatus(
-                `Loaded ${nodes.length} node${nodes.length === 1 ? "" : "s"} from ${sourceName}.`,
-                "success"
+            processCSV(
+                event.target.result,
+                file.name
             );
 
-
-            buildTabs();
-
-            renderTable();
+        };
 
 
-        } catch (error) {
-
-            console.error(error);
+    reader.onerror =
+        () => {
 
             setStatus(
-                "Unable to parse CSV: " +
-                error.message,
+                "Unable to read the selected file.",
                 "error"
             );
 
+        };
+
+
+    reader.readAsText(file);
+
+}
+
+
+/* ============================================================
+   DRAG & DROP
+   ============================================================ */
+
+dropZone.addEventListener(
+    "dragenter",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "drag-over"
+        );
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "drag-over"
+        );
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragleave",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "drag-over"
+        );
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "drag-over"
+        );
+
+
+        const file =
+            event.dataTransfer.files[0];
+
+
+        if (file) {
+
+            readCSVFile(file);
+
         }
 
     }
+);
 
 
-    // ============================================================
-    // CSV parser
-    //
-    // Supports quoted CSV values, commas inside quotes,
-    // escaped double quotes, CRLF and LF.
-    // ============================================================
+/* ============================================================
+   CSV PROCESSING
+   ============================================================ */
 
-    function parseCSV(text) {
+function processCSV(
+    text,
+    sourceName
+) {
 
-        const rows = [];
+    try {
 
-        let row = [];
+        const rows =
+            parseCSV(text);
 
-        let value = "";
 
-        let insideQuotes = false;
+        if (!rows.length) {
+
+            throw new Error(
+                "CSV contains no rows."
+            );
+
+        }
+
+
+        const headers =
+            rows[0].map(
+                header =>
+                    normalizeHeader(
+                        header
+                    )
+            );
+
+
+        /*
+         * Verify the important columns.
+         */
+
+        const missingColumns =
+            REQUIRED_COLUMNS.filter(
+                required =>
+                    !headers.includes(
+                        required
+                    )
+            );
+
+
+        /*
+         * We don't stop loading when
+         * optional data is missing.
+         *
+         * However, we warn the user.
+         */
+
+        if (
+            missingColumns.length
+        ) {
+
+            console.warn(
+                "Missing columns:",
+                missingColumns
+            );
+
+        }
+
+
+        nodes = [];
 
 
         for (
-            let i = 0;
-            i < text.length;
-            i++
+            let rowIndex = 1;
+            rowIndex < rows.length;
+            rowIndex++
         ) {
 
-            const char =
-                text[i];
-
-            const next =
-                text[i + 1];
+            const row =
+                rows[rowIndex];
 
 
-            if (char === '"') {
+            /*
+             * Ignore completely empty rows.
+             */
 
-                if (
-                    insideQuotes &&
-                    next === '"'
-                ) {
-
-                    value += '"';
-
-                    i++;
-
-                } else {
-
-                    insideQuotes =
-                        !insideQuotes;
-
-                }
-
-            }
-
-            else if (
-                char === "," &&
-                !insideQuotes
+            if (
+                row.every(
+                    value =>
+                        String(value)
+                            .trim() === ""
+                )
             ) {
 
-                row.push(value);
-
-                value = "";
+                continue;
 
             }
 
-            else if (
+
+            const node = {};
+
+
+            headers.forEach(
                 (
-                    char === "\n" ||
-                    char === "\r"
-                ) &&
-                !insideQuotes
-            ) {
+                    header,
+                    columnIndex
+                ) => {
 
-                if (
-                    char === "\r" &&
-                    next === "\n"
-                ) {
-
-                    i++;
+                    node[header] =
+                        row[columnIndex] !== undefined
+                            ? String(
+                                row[columnIndex]
+                            ).trim()
+                            : "";
 
                 }
+            );
 
 
-                row.push(value);
+            nodes.push(node);
 
-                value = "";
+        }
 
-                rows.push(row);
 
-                row = [];
+        currentTab = "all";
 
-            }
+        searchText = "";
 
-            else {
+        searchInput.value = "";
 
-                value += char;
+        sortColumn = null;
+
+        sortDirection = "asc";
+
+
+        fileName.textContent =
+            sourceName;
+
+
+        setStatus(
+            `Loaded ${nodes.length} node${nodes.length === 1 ? "" : "s"} from ${sourceName}.`,
+            "success"
+        );
+
+
+        buildTabs();
+
+        renderTable();
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        setStatus(
+            "Unable to parse CSV: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   CSV PARSER
+   ============================================================ */
+
+function parseCSV(text) {
+
+    const rows = [];
+
+    let row = [];
+
+    let value = "";
+
+    let insideQuotes = false;
+
+
+    for (
+        let i = 0;
+        i < text.length;
+        i++
+    ) {
+
+        const char =
+            text[i];
+
+
+        const next =
+            text[i + 1];
+
+
+        /*
+         * Quoted field
+         */
+
+        if (char === '"') {
+
+            if (
+                insideQuotes &&
+                next === '"'
+            ) {
+
+                value += '"';
+
+                i++;
+
+            } else {
+
+                insideQuotes =
+                    !insideQuotes;
 
             }
 
         }
 
 
-        if (
-            value.length > 0 ||
-            row.length > 0
+        /*
+         * Column separator
+         */
+
+        else if (
+            char === "," &&
+            !insideQuotes
         ) {
 
             row.push(value);
 
-            rows.push(row);
+            value = "";
 
         }
 
 
-        return rows;
+        /*
+         * End of row
+         */
 
-    }
-
-
-    // ============================================================
-    // Find column
-    // ============================================================
-
-    function getColumn(
-        node,
-        candidates
-    ) {
-
-        const keys =
-            Object.keys(node);
-
-
-        for (
-            const candidate of candidates
+        else if (
+            (
+                char === "\n" ||
+                char === "\r"
+            ) &&
+            !insideQuotes
         ) {
 
-            const found =
-                keys.find(
-                    key =>
-                        key.trim().toLowerCase() ===
-                        candidate.toLowerCase()
-                );
+            if (
+                char === "\r" &&
+                next === "\n"
+            ) {
 
-
-            if (found) {
-
-                return node[found];
+                i++;
 
             }
+
+
+            row.push(value);
+
+            value = "";
+
+            rows.push(row);
+
+            row = [];
 
         }
 
 
-        return "";
+        else {
+
+            value += char;
+
+        }
 
     }
 
 
-    // ============================================================
-    // Standard fields
-    // ============================================================
+    /*
+     * Last row
+     */
 
-    function getNodeName(node) {
+    if (
+        value.length > 0 ||
+        row.length > 0
+    ) {
 
-        return getColumn(
-            node,
-            [
-                "name",
-                "node",
-                "node_name",
-                "node name"
-            ]
-        );
+        row.push(value);
+
+        rows.push(row);
 
     }
 
 
-    function getNodeIP(node) {
+    return rows;
 
-        return getColumn(
-            node,
-            [
-                "ip",
-                "ip_address",
-                "ip address",
-                "address"
-            ]
+}
+
+
+/* ============================================================
+   HEADER NORMALIZATION
+   ============================================================ */
+
+function normalizeHeader(
+    header
+) {
+
+    return String(header || "")
+        .trim()
+        .toLowerCase()
+        .replace(
+            /^\uFEFF/,
+            ""
+        )
+        .replace(
+            /[_\s]+/g,
+            "-"
         );
 
-    }
+}
 
 
-    function getNodeDescription(node) {
+/* ============================================================
+   FIELD ACCESS
+   ============================================================ */
 
-        return getColumn(
-            node,
-            [
-                "description",
-                "desc",
-                "details"
-            ]
-        );
+function getColumn(
+    node,
+    column
+) {
 
-    }
-
-
-    function getNodeType(node) {
-
-        return (
-            getColumn(
-                node,
-                [
-                    "type",
-                    "node_type",
-                    "node type",
-                    "category"
-                ]
-            ) || "Other"
-        );
-
-    }
-
-
-    // ============================================================
-    // Build dynamic tabs
-    // ============================================================
-
-    function buildTabs() {
-
-        tabs.innerHTML = "";
-
-
-        // All nodes
-
-        tabs.appendChild(
-            createTab(
-                "all",
-                "All",
-                nodes.length
-            )
+    const normalized =
+        normalizeHeader(
+            column
         );
 
 
-        // Count types
+    return (
+        node[normalized] !== undefined
+            ? node[normalized]
+            : ""
+    );
 
-        const typeMap =
-            new Map();
-
-
-        nodes.forEach(
-            node => {
-
-                const type =
-                    getNodeType(node)
-                        .trim() ||
-                    "Other";
+}
 
 
-                const key =
-                    type.toLowerCase();
+/* ============================================================
+   BUILD TABS
+   ============================================================ */
+
+function buildTabs() {
+
+    tabs.innerHTML = "";
 
 
-                if (!typeMap.has(key)) {
+    /*
+     * ALL tab
+     */
 
-                    typeMap.set(
-                        key,
-                        {
-                            label: type,
-                            count: 0
-                        }
-                    );
-
-                }
-
-
-                typeMap.get(key).count++;
-
-            }
-        );
+    tabs.appendChild(
+        createTab(
+            "all",
+            "All",
+            nodes.length
+        )
+    );
 
 
-        // Alphabetical order
+    /*
+     * Get node types
+     */
 
-        const types =
-            Array.from(
-                typeMap.values()
-            ).sort(
-                (a, b) =>
-                    a.label.localeCompare(
-                        b.label
-                    )
-            );
+    const typeMap =
+        new Map();
 
 
-        types.forEach(
-            item => {
+    nodes.forEach(
+        node => {
 
-                const key =
-                    item.label.toLowerCase();
+            const type =
+                (
+                    getColumn(
+                        node,
+                        "type"
+                    ) ||
+                    "Other"
+                ).trim();
 
 
-                tabs.appendChild(
-                    createTab(
-                        key,
-                        item.label,
-                        item.count
-                    )
+            const key =
+                type.toLowerCase();
+
+
+            if (
+                !typeMap.has(key)
+            ) {
+
+                typeMap.set(
+                    key,
+                    {
+                        label: type,
+                        count: 0
+                    }
                 );
 
             }
+
+
+            typeMap.get(
+                key
+            ).count++;
+
+        }
+    );
+
+
+    /*
+     * Sort types alphabetically.
+     */
+
+    const types =
+        Array.from(
+            typeMap.values()
+        ).sort(
+            (a, b) =>
+                a.label.localeCompare(
+                    b.label
+                )
         );
 
 
-        updateActiveTab();
+    types.forEach(
+        item => {
 
-    }
-
-
-    function createTab(
-        key,
-        label,
-        count
-    ) {
-
-        const button =
-            document.createElement(
-                "button"
+            tabs.appendChild(
+                createTab(
+                    item.label.toLowerCase(),
+                    item.label,
+                    item.count
+                )
             );
 
-
-        button.className =
-            "tab";
-
-
-        button.dataset.tab =
-            key;
+        }
+    );
 
 
-        button.innerHTML =
-            `${escapeHTML(label)}
-             <span class="tab-count">
-                 (${count})
-             </span>`;
+    updateActiveTab();
+
+}
 
 
-        button.addEventListener(
-            "click",
-            () => {
+/* ============================================================
+   CREATE TAB
+   ============================================================ */
 
-                currentTab =
-                    key;
+function createTab(
+    key,
+    label,
+    count
+) {
 
-                updateActiveTab();
-
-                renderTable();
-
-            }
+    const button =
+        document.createElement(
+            "button"
         );
 
 
-        return button;
-
-    }
-
-
-    function updateActiveTab() {
-
-        document
-            .querySelectorAll(".tab")
-            .forEach(
-                button => {
-
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.tab ===
-                        currentTab
-                    );
-
-                }
-            );
-
-    }
+    button.className =
+        "tab";
 
 
-    // ============================================================
-    // Search
-    // ============================================================
+    button.dataset.tab =
+        key;
 
-    searchInput.addEventListener(
-        "input",
-        event => {
 
-            searchText =
-                event.target.value
-                    .trim()
-                    .toLowerCase();
+    button.innerHTML =
+        `${escapeHTML(label)}
+        <span class="tab-count">
+            (${count})
+        </span>`;
 
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            currentTab =
+                key;
+
+
+            updateActiveTab();
 
             renderTable();
 
@@ -1507,842 +2079,1130 @@
     );
 
 
-    // ============================================================
-    // Get filtered nodes
-    // ============================================================
+    return button;
 
-    function getFilteredNodes() {
-
-        let result =
-            nodes.filter(
-                node => {
-
-                    const type =
-                        getNodeType(node)
-                            .trim()
-                            .toLowerCase();
+}
 
 
-                    const tabMatches =
-                        currentTab === "all" ||
-                        type === currentTab;
+/* ============================================================
+   ACTIVE TAB
+   ============================================================ */
 
+function updateActiveTab() {
 
-                    if (!tabMatches) {
-                        return false;
-                    }
+    document
+        .querySelectorAll(
+            ".tab"
+        )
+        .forEach(
+            button => {
 
-
-                    if (!searchText) {
-                        return true;
-                    }
-
-
-                    // Search every CSV field
-
-                    return Object
-                        .values(node)
-                        .some(
-                            value =>
-                                String(value)
-                                    .toLowerCase()
-                                    .includes(
-                                        searchText
-                                    )
-                        );
-
-                }
-            );
-
-
-        // Sorting
-
-        if (sortColumn) {
-
-            result.sort(
-                (a, b) => {
-
-                    const av =
-                        String(
-                            a[sortColumn] ?? ""
-                        ).toLowerCase();
-
-
-                    const bv =
-                        String(
-                            b[sortColumn] ?? ""
-                        ).toLowerCase();
-
-
-                    const comparison =
-                        av.localeCompare(
-                            bv,
-                            undefined,
-                            {
-                                numeric: true,
-                                sensitivity: "base"
-                            }
-                        );
-
-
-                    return (
-                        sortDirection === "asc"
-                            ? comparison
-                            : -comparison
-                    );
-
-                }
-            );
-
-        }
-
-
-        return result;
-
-    }
-
-
-    // ============================================================
-    // Render table
-    // ============================================================
-
-    function renderTable() {
-
-        if (!nodes.length) {
-
-            resultCount.textContent =
-                "0 nodes";
-
-
-            tableContainer.innerHTML = `
-                <div class="empty">
-
-                    <div class="empty-title">
-                        No node data loaded
-                    </div>
-
-                    <div class="empty-text">
-                        Choose a CSV file above.
-                    </div>
-
-                </div>
-            `;
-
-
-            return;
-
-        }
-
-
-        const filtered =
-            getFilteredNodes();
-
-
-        resultCount.textContent =
-            `${filtered.length} node${filtered.length === 1 ? "" : "s"}`;
-
-
-        if (!filtered.length) {
-
-            tableContainer.innerHTML = `
-                <div class="empty">
-
-                    <div class="empty-title">
-                        No matching nodes
-                    </div>
-
-                    <div class="empty-text">
-                        Try changing your search or selecting another tab.
-                    </div>
-
-                </div>
-            `;
-
-
-            return;
-
-        }
-
-
-        /*
-         * Determine available columns.
-         *
-         * Standard columns appear first.
-         * Additional CSV columns follow.
-         */
-
-        const preferredColumns = [];
-
-        const allKeys =
-            Object.keys(nodes[0]);
-
-
-        function addColumn(
-            actualKey
-        ) {
-
-            if (
-                actualKey &&
-                !preferredColumns.includes(
-                    actualKey
-                )
-            ) {
-
-                preferredColumns.push(
-                    actualKey
+                button.classList.toggle(
+                    "active",
+                    button.dataset.tab ===
+                    currentTab
                 );
 
             }
-
-        }
-
-
-        function findKey(
-            candidates
-        ) {
-
-            return allKeys.find(
-                key =>
-                    candidates.includes(
-                        key.toLowerCase()
-                    )
-            );
-
-        }
-
-
-        addColumn(
-            findKey(
-                [
-                    "name",
-                    "node",
-                    "node_name",
-                    "node name"
-                ]
-            )
         );
 
-
-        addColumn(
-            findKey(
-                [
-                    "ip",
-                    "ip_address",
-                    "ip address",
-                    "address"
-                ]
-            )
-        );
+}
 
 
-        addColumn(
-            findKey(
-                [
-                    "description",
-                    "desc",
-                    "details"
-                ]
-            )
-        );
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+searchInput.addEventListener(
+    "input",
+    event => {
+
+        searchText =
+            event.target.value
+                .trim()
+                .toLowerCase();
 
 
-        addColumn(
-            findKey(
-                [
-                    "type",
-                    "node_type",
-                    "node type",
-                    "category"
-                ]
-            )
-        );
+        renderTable();
+
+    }
+);
 
 
-        // Additional fields
+/* ============================================================
+   FILTER NODES
+   ============================================================ */
 
-        allKeys.forEach(
-            key => {
+function getFilteredNodes() {
 
-                if (
-                    !preferredColumns.includes(
-                        key
-                    )
-                ) {
-
-                    preferredColumns.push(
-                        key
-                    );
-
-                }
-
-            }
-        );
-
-
-        /*
-         * Keep the main table readable.
-         * Extra columns remain available in details.
-         */
-
-        const visibleColumns =
-            preferredColumns.slice(
-                0,
-                6
-            );
-
-
-        let html = `
-            <table>
-
-                <thead>
-
-                    <tr>
-        `;
-
-
-        visibleColumns.forEach(
-            column => {
-
-                const arrow =
-                    sortColumn === column
-                        ? (
-                            sortDirection === "asc"
-                                ? " ▲"
-                                : " ▼"
-                        )
-                        : "";
-
-
-                html += `
-                    <th
-                        data-column="${escapeAttribute(column)}"
-                        title="Sort by ${escapeAttribute(column)}"
-                    >
-                        ${escapeHTML(column)}
-                        ${arrow}
-                    </th>
-                `;
-
-            }
-        );
-
-
-        html += `
-                    </tr>
-
-                </thead>
-
-                <tbody>
-        `;
-
-
-        filtered.forEach(
+    let result =
+        nodes.filter(
             node => {
 
-                const nodeIndex =
-                    nodes.indexOf(node);
+                const type =
+                    (
+                        getColumn(
+                            node,
+                            "type"
+                        ) ||
+                        "Other"
+                    )
+                    .trim()
+                    .toLowerCase();
 
 
-                html += `
-                    <tr
-                        data-node-index="${nodeIndex}"
-                    >
-                `;
+                /*
+                 * Tab filter
+                 */
+
+                if (
+                    currentTab !== "all" &&
+                    type !== currentTab
+                ) {
+
+                    return false;
+
+                }
 
 
-                visibleColumns.forEach(
-                    column => {
+                /*
+                 * Search filter
+                 */
 
-                        const value =
-                            node[column] ?? "";
+                if (!searchText) {
+
+                    return true;
+
+                }
 
 
-                        const normalized =
-                            column
+                return Object
+                    .values(node)
+                    .some(
+                        value =>
+                            String(value)
                                 .toLowerCase()
-                                .replace(
-                                    /[\s_-]/g,
-                                    ""
-                                );
+                                .includes(
+                                    searchText
+                                )
+                    );
+
+            }
+        );
 
 
-                        // ------------------------------------------------
-                        // IP column
-                        // ------------------------------------------------
+    /*
+     * Sorting
+     */
+
+    if (sortColumn) {
+
+        result.sort(
+            (a, b) => {
+
+                const av =
+                    String(
+                        a[sortColumn] || ""
+                    ).toLowerCase();
+
+
+                const bv =
+                    String(
+                        b[sortColumn] || ""
+                    ).toLowerCase();
+
+
+                const comparison =
+                    av.localeCompare(
+                        bv,
+                        undefined,
+                        {
+                            numeric: true,
+                            sensitivity: "base"
+                        }
+                    );
+
+
+                return sortDirection === "asc"
+                    ? comparison
+                    : -comparison;
+
+            }
+        );
+
+    }
+
+
+    return result;
+
+}
+
+
+/* ============================================================
+   RENDER TABLE
+   ============================================================ */
+
+function renderTable() {
+
+    if (!nodes.length) {
+
+        resultCount.textContent =
+            "0 nodes";
+
+
+        tableContainer.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-title">
+                    No node data loaded
+                </div>
+
+                <div class="empty-text">
+                    Choose a CSV file above.
+                </div>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    const filtered =
+        getFilteredNodes();
+
+
+    resultCount.textContent =
+        `${filtered.length} node${filtered.length === 1 ? "" : "s"}`;
+
+
+    if (!filtered.length) {
+
+        tableContainer.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-title">
+                    No matching nodes
+                </div>
+
+                <div class="empty-text">
+                    Try changing your search or selecting another tab.
+                </div>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    /*
+     * IMPORTANT:
+     *
+     * The three IP fields are always separate
+     * columns in every row.
+     */
+
+    const columns = [
+
+        {
+            key: "name",
+            label: "Name"
+        },
+
+        {
+            key: "internal-ip",
+            label: "Internal IP"
+        },
+
+        {
+            key: "ipmi-ip",
+            label: "IPMI IP"
+        },
+
+        {
+            key: "mgmt-ip",
+            label: "Mgmt IP"
+        },
+
+        {
+            key: "type",
+            label: "Type"
+        },
+
+        {
+            key: "rack",
+            label: "Rack"
+        },
+
+        {
+            key: "location",
+            label: "Location"
+        },
+
+        {
+            key: "status",
+            label: "Status"
+        },
+
+        {
+            key: "description",
+            label: "Description"
+        },
+
+        {
+            key: "serial",
+            label: "Serial"
+        }
+
+    ];
+
+
+    let html = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+    `;
+
+
+    columns.forEach(
+        column => {
+
+            let arrow = "";
+
+
+            if (
+                sortColumn === column.key
+            ) {
+
+                arrow =
+                    sortDirection === "asc"
+                        ? " ▲"
+                        : " ▼";
+
+            }
+
+
+            html += `
+
+                <th
+                    data-column="${escapeAttribute(
+                        column.key
+                    )}"
+                >
+
+                    ${escapeHTML(
+                        column.label
+                    )}
+
+                    ${arrow}
+
+                </th>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+
+    filtered.forEach(
+        node => {
+
+            const nodeIndex =
+                nodes.indexOf(
+                    node
+                );
+
+
+            html += `
+
+                <tr
+                    data-node-index="${nodeIndex}"
+                >
+
+                    <!-- NAME -->
+
+                    <td class="node-name">
+
+                        ${escapeHTML(
+                            getColumn(
+                                node,
+                                "name"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- INTERNAL IP -->
+
+                    <td class="ip-address">
+
+                        ${createIPLink(
+                            getColumn(
+                                node,
+                                "internal-ip"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- IPMI IP -->
+
+                    <td class="ip-address">
+
+                        ${createIPLink(
+                            getColumn(
+                                node,
+                                "ipmi-ip"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- MANAGEMENT IP -->
+
+                    <td class="ip-address">
+
+                        ${createIPLink(
+                            getColumn(
+                                node,
+                                "mgmt-ip"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- TYPE -->
+
+                    <td>
+
+                        <span class="type-badge">
+
+                            ${escapeHTML(
+                                getColumn(
+                                    node,
+                                    "type"
+                                ) ||
+                                "Other"
+                            )}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- RACK -->
+
+                    <td>
+
+                        ${escapeHTML(
+                            getColumn(
+                                node,
+                                "rack"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- LOCATION -->
+
+                    <td>
+
+                        ${escapeHTML(
+                            getColumn(
+                                node,
+                                "location"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        ${createStatusBadge(
+                            getColumn(
+                                node,
+                                "status"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <td>
+
+                        ${escapeHTML(
+                            getColumn(
+                                node,
+                                "description"
+                            )
+                        )}
+
+                    </td>
+
+
+                    <!-- SERIAL -->
+
+                    <td class="serial">
+
+                        ${escapeHTML(
+                            getColumn(
+                                node,
+                                "serial"
+                            )
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+    `;
+
+
+    tableContainer.innerHTML =
+        html;
+
+
+    /*
+     * ----------------------------------------------------------
+     * Column sorting
+     * ----------------------------------------------------------
+     */
+
+    tableContainer
+        .querySelectorAll(
+            "th"
+        )
+        .forEach(
+            th => {
+
+                th.addEventListener(
+                    "click",
+                    () => {
+
+                        const column =
+                            th.dataset.column;
+
 
                         if (
-                            normalized === "ip" ||
-                            normalized === "ipaddress" ||
-                            normalized === "address"
+                            sortColumn === column
                         ) {
 
-                            const ip =
-                                String(value)
-                                    .trim();
+                            sortDirection =
+                                sortDirection === "asc"
+                                    ? "desc"
+                                    : "asc";
 
+                        } else {
 
-                            if (ip) {
+                            sortColumn =
+                                column;
 
-                                html += `
-                                    <td class="ip-address">
-
-                                        <a
-                                            href="http://${escapeAttribute(ip)}"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            class="ip-link"
-                                            title="Open http://${escapeAttribute(ip)} in a new tab"
-                                        >
-                                            ${escapeHTML(ip)}
-                                        </a>
-
-                                    </td>
-                                `;
-
-                            } else {
-
-                                html += `
-                                    <td class="ip-address"></td>
-                                `;
-
-                            }
+                            sortDirection =
+                                "asc";
 
                         }
 
 
-                        // ------------------------------------------------
-                        // Type column
-                        // ------------------------------------------------
-
-                        else if (
-                            normalized === "type" ||
-                            normalized === "nodetype" ||
-                            normalized === "category"
-                        ) {
-
-                            html += `
-                                <td>
-
-                                    <span class="type-badge">
-                                        ${escapeHTML(
-                                            value || "Other"
-                                        )}
-                                    </span>
-
-                                </td>
-                            `;
-
-                        }
-
-
-                        // ------------------------------------------------
-                        // Name column
-                        // ------------------------------------------------
-
-                        else if (
-                            normalized === "name" ||
-                            normalized === "node" ||
-                            normalized === "nodename"
-                        ) {
-
-                            html += `
-                                <td class="node-name">
-                                    ${escapeHTML(value)}
-                                </td>
-                            `;
-
-                        }
-
-
-                        // ------------------------------------------------
-                        // Other columns
-                        // ------------------------------------------------
-
-                        else {
-
-                            html += `
-                                <td>
-                                    ${escapeHTML(value)}
-                                </td>
-                            `;
-
-                        }
+                        renderTable();
 
                     }
                 );
 
-
-                html += `
-                    </tr>
-                `;
-
             }
         );
 
 
-        html += `
-                </tbody>
+    /*
+     * ----------------------------------------------------------
+     * Row click
+     * ----------------------------------------------------------
+     *
+     * Clicking an IP link is excluded.
+     *
+     * Therefore:
+     *
+     *     click IP  -> opens IP in new browser tab
+     *
+     *     click row -> opens node details
+     *
+     * ----------------------------------------------------------
+     */
 
-            </table>
-        `;
+    tableContainer
+        .querySelectorAll(
+            "tbody tr"
+        )
+        .forEach(
+            row => {
 
+                row.addEventListener(
+                    "click",
+                    event => {
 
-        tableContainer.innerHTML =
-            html;
+                        if (
+                            event.target.closest(
+                                "a"
+                            )
+                        ) {
 
-
-        // ========================================================
-        // Sorting handlers
-        // ========================================================
-
-        tableContainer
-            .querySelectorAll("th")
-            .forEach(
-                th => {
-
-                    th.addEventListener(
-                        "click",
-                        () => {
-
-                            const column =
-                                th.dataset.column;
-
-
-                            if (
-                                sortColumn === column
-                            ) {
-
-                                sortDirection =
-                                    sortDirection === "asc"
-                                        ? "desc"
-                                        : "asc";
-
-                            } else {
-
-                                sortColumn =
-                                    column;
-
-                                sortDirection =
-                                    "asc";
-
-                            }
-
-
-                            renderTable();
+                            return;
 
                         }
-                    );
-
-                }
-            );
 
 
-        // ========================================================
-        // Row click handlers
-        // ========================================================
-
-        tableContainer
-            .querySelectorAll(
-                "tbody tr"
-            )
-            .forEach(
-                row => {
-
-                    row.addEventListener(
-                        "click",
-                        event => {
-
-                            /*
-                             * If the user clicked the IP hyperlink,
-                             * let the browser handle the link.
-                             *
-                             * Do not open the node details dialog.
-                             */
-
-                            if (
-                                event.target.closest("a")
-                            ) {
-
-                                return;
-
-                            }
-
-
-                            const index =
-                                Number(
-                                    row.dataset.nodeIndex
-                                );
-
-
-                            showNodeDetails(
-                                nodes[index]
+                        const index =
+                            Number(
+                                row.dataset.nodeIndex
                             );
 
-                        }
-                    );
 
-                }
-            );
-
-    }
-
-
-    // ============================================================
-    // Show node details
-    // ============================================================
-
-    function showNodeDetails(
-        node
-    ) {
-
-        const name =
-            getNodeName(node) ||
-            "Node Details";
-
-
-        modalTitle.textContent =
-            name;
-
-
-        detailGrid.innerHTML =
-            "";
-
-
-        Object.entries(node)
-            .forEach(
-                (
-                    [key, value]
-                ) => {
-
-                    const label =
-                        document.createElement(
-                            "div"
+                        showNodeDetails(
+                            nodes[index]
                         );
-
-
-                    label.className =
-                        "detail-label";
-
-
-                    label.textContent =
-                        key;
-
-
-                    const detail =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    detail.className =
-                        "detail-value";
-
-
-                    /*
-                     * Make the IP clickable inside
-                     * the details window as well.
-                     */
-
-                    const normalized =
-                        key
-                            .toLowerCase()
-                            .replace(
-                                /[\s_-]/g,
-                                ""
-                            );
-
-
-                    if (
-                        normalized === "ip" ||
-                        normalized === "ipaddress" ||
-                        normalized === "address"
-                    ) {
-
-                        const ip =
-                            String(value).trim();
-
-
-                        if (ip) {
-
-                            const link =
-                                document.createElement(
-                                    "a"
-                                );
-
-
-                            link.href =
-                                "http://" + ip;
-
-
-                            link.target =
-                                "_blank";
-
-
-                            link.rel =
-                                "noopener noreferrer";
-
-
-                            link.className =
-                                "ip-link";
-
-
-                            link.textContent =
-                                ip;
-
-
-                            link.title =
-                                "Open " +
-                                ip +
-                                " in a new tab";
-
-
-                            detail.appendChild(
-                                link
-                            );
-
-                        }
-
-                    } else {
-
-                        detail.textContent =
-                            value;
 
                     }
+                );
+
+            }
+        );
+
+}
 
 
-                    detailGrid.appendChild(
-                        label
+/* ============================================================
+   IP LINK
+   ============================================================ */
+
+function createIPLink(
+    ip
+) {
+
+    ip =
+        String(
+            ip || ""
+        ).trim();
+
+
+    /*
+     * Empty IP.
+     */
+
+    if (!ip) {
+
+        return `
+            <span class="no-ip">
+                —
+            </span>
+        `;
+
+    }
+
+
+    /*
+     * Every IP is an independent hyperlink.
+     *
+     * HTTP is used by default.
+     *
+     * target="_blank" means a new browser tab.
+     */
+
+    return `
+
+        <a
+            href="http://${escapeAttribute(ip)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ip-link"
+            title="Open http://${escapeAttribute(ip)} in a new browser tab"
+        >
+            ${escapeHTML(ip)}
+        </a>
+
+    `;
+
+}
+
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+
+function createStatusBadge(
+    value
+) {
+
+    const status =
+        String(
+            value || ""
+        ).trim();
+
+
+    const normalized =
+        status.toLowerCase();
+
+
+    let cssClass =
+        "status-unknown";
+
+
+    if (
+        normalized === "online" ||
+        normalized === "up" ||
+        normalized === "ok" ||
+        normalized === "healthy"
+    ) {
+
+        cssClass =
+            "status-online";
+
+    }
+
+
+    else if (
+        normalized === "warning" ||
+        normalized === "warn" ||
+        normalized === "degraded"
+    ) {
+
+        cssClass =
+            "status-warning";
+
+    }
+
+
+    else if (
+        normalized === "offline" ||
+        normalized === "down" ||
+        normalized === "failed" ||
+        normalized === "failure"
+    ) {
+
+        cssClass =
+            "status-offline";
+
+    }
+
+
+    return `
+
+        <span
+            class="status-badge ${cssClass}"
+        >
+
+            <span
+                class="status-dot"
+            ></span>
+
+            ${escapeHTML(
+                status || "Unknown"
+            )}
+
+        </span>
+
+    `;
+
+}
+
+
+/* ============================================================
+   NODE DETAILS
+   ============================================================ */
+
+function showNodeDetails(
+    node
+) {
+
+    const name =
+        getColumn(
+            node,
+            "name"
+        ) ||
+        "Node Details";
+
+
+    modalTitle.textContent =
+        name;
+
+
+    detailGrid.innerHTML =
+        "";
+
+
+    /*
+     * Display the fields in the same
+     * logical order as the table.
+     */
+
+    const columns = [
+
+        "name",
+        "internal-ip",
+        "ipmi-ip",
+        "mgmt-ip",
+        "type",
+        "rack",
+        "location",
+        "status",
+        "description",
+        "serial"
+
+    ];
+
+
+    columns.forEach(
+        key => {
+
+            const value =
+                getColumn(
+                    node,
+                    key
+                );
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "detail-label";
+
+
+            label.textContent =
+                getPrettyLabel(
+                    key
+                );
+
+
+            const detail =
+                document.createElement(
+                    "div"
+                );
+
+
+            detail.className =
+                "detail-value";
+
+
+            /*
+             * IP address
+             */
+
+            if (
+                key === "internal-ip" ||
+                key === "ipmi-ip" ||
+                key === "mgmt-ip"
+            ) {
+
+                if (value) {
+
+                    const link =
+                        document.createElement(
+                            "a"
+                        );
+
+
+                    link.href =
+                        "http://" + value;
+
+
+                    link.target =
+                        "_blank";
+
+
+                    link.rel =
+                        "noopener noreferrer";
+
+
+                    link.className =
+                        "ip-link";
+
+
+                    link.textContent =
+                        value;
+
+
+                    detail.appendChild(
+                        link
                     );
 
+                } else {
 
-                    detailGrid.appendChild(
-                        detail
-                    );
+                    detail.textContent =
+                        "—";
 
                 }
+
+            }
+
+
+            /*
+             * Status
+             */
+
+            else if (
+                key === "status"
+            ) {
+
+                detail.innerHTML =
+                    createStatusBadge(
+                        value
+                    );
+
+            }
+
+
+            /*
+             * Normal field
+             */
+
+            else {
+
+                detail.textContent =
+                    value || "—";
+
+            }
+
+
+            detailGrid.appendChild(
+                label
             );
 
 
-        modalOverlay.classList.add(
-            "show"
-        );
-
-    }
-
-
-    // ============================================================
-    // Close modal
-    // ============================================================
-
-    closeModal.addEventListener(
-        "click",
-        closeDetails
-    );
-
-
-    modalOverlay.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                modalOverlay
-            ) {
-
-                closeDetails();
-
-            }
+            detailGrid.appendChild(
+                detail
+            );
 
         }
     );
 
 
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeDetails();
-
-            }
-
-        }
+    modalOverlay.classList.add(
+        "show"
     );
 
+}
 
-    function closeDetails() {
 
-        modalOverlay.classList.remove(
-            "show"
-        );
+/* ============================================================
+   PRETTY LABEL
+   ============================================================ */
+
+function getPrettyLabel(
+    key
+) {
+
+    switch (key) {
+
+        case "name":
+            return "Name";
+
+        case "internal-ip":
+            return "Internal IP";
+
+        case "ipmi-ip":
+            return "IPMI IP";
+
+        case "mgmt-ip":
+            return "Mgmt IP";
+
+        case "type":
+            return "Type";
+
+        case "rack":
+            return "Rack";
+
+        case "location":
+            return "Location";
+
+        case "status":
+            return "Status";
+
+        case "description":
+            return "Description";
+
+        case "serial":
+            return "Serial";
+
+        default:
+            return key;
 
     }
 
-
-    // ============================================================
-    // Status message
-    // ============================================================
-
-    function setStatus(
-        message,
-        type = ""
-    ) {
-
-        status.textContent =
-            message;
+}
 
 
-        status.className =
-            "status " + type;
+/* ============================================================
+   CLOSE MODAL
+   ============================================================ */
+
+closeModal.addEventListener(
+    "click",
+    closeDetails
+);
+
+
+modalOverlay.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            modalOverlay
+        ) {
+
+            closeDetails();
+
+        }
 
     }
+);
 
 
-    // ============================================================
-    // HTML escaping
-    // ============================================================
+document.addEventListener(
+    "keydown",
+    event => {
 
-    function escapeHTML(
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeDetails();
+
+        }
+
+    }
+);
+
+
+function closeDetails() {
+
+    modalOverlay.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* ============================================================
+   STATUS MESSAGE
+   ============================================================ */
+
+function setStatus(
+    message,
+    type = ""
+) {
+
+    statusElement.textContent =
+        message;
+
+
+    statusElement.className =
+        "status " + type;
+
+}
+
+
+/* ============================================================
+   HTML ESCAPING
+   ============================================================ */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return escapeHTML(
         value
-    ) {
+    );
 
-        return String(value)
-            .replaceAll(
-                "&",
-                "&amp;"
-            )
-            .replaceAll(
-                "<",
-                "&lt;"
-            )
-            .replaceAll(
-                ">",
-                "&gt;"
-            )
-            .replaceAll(
-                '"',
-                "&quot;"
-            )
-            .replaceAll(
-                "'",
-                "&#039;"
-            );
-
-    }
-
-
-    function escapeAttribute(
-        value
-    ) {
-
-        return escapeHTML(value);
-
-    }
+}
 
 </script>
 
+
 </body>
+
 </html>
