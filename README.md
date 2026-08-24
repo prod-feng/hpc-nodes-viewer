@@ -1,3 +1,4 @@
+Rocky Linux 9. Python 3.9(For Python 3.6, the run_me.sh needs to be modified.).
 
 Standalone webapp to list all managed devices in an integrated and organized way. For HPC data center, you can put managed UPS, PDU, Switch, storage servers, JBOD chassis, etc into a single web page. 
 It works kind of like a property management system, and most importantly gives admins an integrated interface to manage all critical devices.
