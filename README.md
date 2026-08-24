@@ -3,8 +3,8 @@ Standalone webapp to list all managed nodes in an integrated way.
 
 Put all the nodes information in a CSV file, by default: nodes.csv. You can also open any CSV files, once they have the format of:
 ~~~
-name,ip,description,type
+name,internal-ip,ipmi-ip,mgmt-ip,type,rack,location,status,description,serial
 ~~~
 
+ <img width="1532" height="663" alt="node-viewer" src="https://github.com/user-attachments/assets/2a99aa28-c5ea-4590-acb6-e795a56c2c50" />
 
-<img width="1360" height="593" alt="node-viewer" src="https://github.com/user-attachments/assets/80866b7a-73c5-40de-a3c3-555dad423872" />
