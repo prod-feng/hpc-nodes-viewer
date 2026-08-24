@@ -1,0 +1,9 @@
+name,ip,description,type
+mgmt-01,10.10.1.10,Management server 01,management
+mgmt-02,10.10.1.11,Management server 02,management
+storage-01,10.10.2.10,Storage node 01,storage
+storage-02,10.10.2.11,Storage node 02,storage
+jbod-01,10.10.3.10,JBOD enclosure 01,jbod
+jbod-02,10.10.3.11,JBOD enclosure 02,jbod
+sw-01,10.10.4.10,Top of rack switch 01,switch
+sw-02,10.10.4.11,Top of rack switch 02,switch
