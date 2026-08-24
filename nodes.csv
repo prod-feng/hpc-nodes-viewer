@@ -1,9 +1,5 @@
-name,ip,description,type
-mgmt-01,10.10.1.10,Management server 01,management
-mgmt-02,10.10.1.11,Management server 02,management
-storage-01,10.10.2.10,Storage node 01,storage
-storage-02,10.10.2.11,Storage node 02,storage
-jbod-01,10.10.3.10,JBOD enclosure 01,jbod
-jbod-02,10.10.3.11,JBOD enclosure 02,jbod
-sw-01,10.10.4.10,Top of rack switch 01,switch
-sw-02,10.10.4.11,Top of rack switch 02,switch
+name,internal-ip,ipmi-ip,mgmt-ip,type,rack,location,status,description,serial
+server-01,10.10.1.10,10.20.1.10,10.30.1.10,storage,R01,DC1,Online,Storage server 01,SN001
+server-02,10.10.1.11,10.20.1.11,10.30.1.11,storage,R01,DC1,Online,Storage server 02,SN002
+jbod-01,10.10.2.10,10.20.2.10,10.30.2.10,jbod,R02,DC1,Online,JBOD enclosure 01,JB001
+switch-01,10.10.3.10,,10.30.3.10,switch,R03,DC1,Online,Top of rack switch,SW001
