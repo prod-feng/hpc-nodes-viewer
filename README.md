@@ -7,7 +7,7 @@ Put all the nodes information in a CSV file, by default: nodes.csv. You can also
 name,internal-ip,ipmi-ip,mgmt-ip,type,rack,location,status,description,serial
 ~~~
 
-You can download the index.html, and prepare your notes.csv file. Using any web browser to open it. It should work well offline(some browser might not support well).
+You can download the index.html, and prepare your notes.csv file. Using any web browser to open it. It should work well offline(some browser might not support well). You need to keep maintaining this nodes.csv file.
 
 You can also start light-weighted web service as a regular user, on a Linux box, like Rocky Linux 9:
 
@@ -15,7 +15,7 @@ You can also start light-weighted web service as a regular user, on a Linux box,
 >python3 -m http.server 8​111 --bind 127.0.0.1
 ~~~
 
-Bind it to an internal network, to keep it away from outside access, for the sake of security.
+Bind it to an internal network, to keep it away from outsider access, for the sake of security.
 
 Use a web browser to open: 
 ```
