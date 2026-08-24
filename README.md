@@ -6,6 +6,7 @@ Put all the nodes information in a CSV file, by default: nodes.csv. You can also
 ~~~
 name,internal-ip,ipmi-ip,mgmt-ip,type,rack,location,status,description,serial
 ~~~
+The webapp can automatically pick up new "type" of new devices, and show them properly.
 
 You can download the index.html, and prepare your notes.csv file. Using any web browser to open it. It should work well offline(some browser might not support well). You need to keep maintaining this nodes.csv file.
 
