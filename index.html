@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Node Viewer</title>
+
+    <style>
+        :root {
+            --bg: #f4f6f8;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #dfe3e8;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --hover: #f8fafc;
+            --tab-bg: #e9eef5;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .app {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* ========================================================
+           Header
+           ======================================================== */
+
+        .header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 650;
+        }
+
+        .subtitle {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .file-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-name {
+            color: var(--muted);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 7px;
+            padding: 9px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .primary-button {
+            background: var(--primary);
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: var(--primary-dark);
+        }
+
+        .secondary-button {
+            background: #eef2f7;
+            color: var(--text);
+        }
+
+        .secondary-button:hover {
+            background: #e2e8f0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* ========================================================
+           Status
+           ======================================================== */
+
+        .status {
+            margin-top: 14px;
+            padding: 9px 12px;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        /* ========================================================
+           Tabs
+           ======================================================== */
+
+        .tabs-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 12px;
+            margin-bottom: 18px;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .tab {
+            background: var(--tab-bg);
+            color: #475569;
+            border-radius: 7px;
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .tab:hover {
+            background: #dde5ef;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-count {
+            margin-left: 5px;
+            opacity: 0.75;
+        }
+
+        /* ========================================================
+           Main Content
+           ======================================================== */
+
+        .content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 10px 13px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .result-count {
+            color: var(--muted);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* ========================================================
+           Table
+           ======================================================== */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 650;
+            text-align: left;
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #f1f5f9;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #edf0f3;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--hover);
+        }
+
+        .node-name {
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .ip-address {
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Monaco,
+                Consolas,
+                monospace;
+            font-size: 13px;
+        }
+
+        /*
+         * Clickable IP address
+         */
+
+        .ip-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Monaco,
+                Consolas,
+                monospace;
+            font-size: 13px;
+        }
+
+        .ip-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #e8eefc;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .empty {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-title {
+            font-size: 18px;
+            color: var(--text);
+            margin-bottom: 7px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* ========================================================
+           Modal
+           ======================================================== */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            width: min(650px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .close-button {
+            background: transparent;
+            color: var(--muted);
+            font-size: 22px;
+            padding: 3px 8px;
+        }
+
+        .close-button:hover {
+            background: #f1f5f9;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .detail-label,
+        .detail-value {
+            padding: 11px 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-label {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .detail-value {
+            overflow-wrap: anywhere;
+        }
+
+        .detail-grid > :nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+        /* ========================================================
+           Drop Zone
+           ======================================================== */
+
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 9px;
+            margin: 15px 18px;
+            padding: 25px;
+            text-align: center;
+            color: var(--muted);
+            transition: all 0.15s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .drop-zone strong {
+            color: var(--text);
+        }
+
+        /* ========================================================
+           Responsive
+           ======================================================== */
+
+        @media (max-width: 750px) {
+
+            .app {
+                padding: 12px;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .file-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-label {
+                border-bottom: none;
+                padding-bottom: 4px;
+            }
+
+            .detail-value {
+                padding-top: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ========================================================
+         Header
+         ======================================================== -->
+
+    <div class="header">
+
+        <div class="header-top">
+
+            <div>
+                <h1 class="title">
+                    Infrastructure Node Viewer
+                </h1>
+
+                <div class="subtitle">
+                    Offline node inventory viewer
+                </div>
+            </div>
+
+            <div class="file-controls">
+
+                <span
+                    class="file-name"
+                    id="fileName"
+                >
+                    Loading nodes.csv...
+                </span>
+
+                <label
+                    class="primary-button"
+                    style="padding: 9px 15px; cursor: pointer;"
+                >
+                    Choose CSV
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".csv,text/csv"
+                    >
+                </label>
+
+            </div>
+
+        </div>
+
+        <div
+            id="status"
+            class="status"
+        >
+            Loading default CSV...
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         Tabs
+         ======================================================== -->
+
+    <div class="tabs-container">
+
+        <div
+            class="tabs"
+            id="tabs"
+        ></div>
+
+    </div>
+
+
+    <!-- ========================================================
+         Main Content
+         ======================================================== -->
+
+    <div class="content">
+
+        <div class="toolbar">
+
+            <div class="search-container">
+
+                <input
+                    type="search"
+                    class="search"
+                    id="searchInput"
+                    placeholder="Search node name, IP address, description, type..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+            <div
+                class="result-count"
+                id="resultCount"
+            >
+                0 nodes
+            </div>
+
+        </div>
+
+
+        <!-- Drag and Drop -->
+
+        <div
+            class="drop-zone"
+            id="dropZone"
+        >
+            <strong>Drop a CSV file here</strong>
+            <br>
+            or use the <strong>Choose CSV</strong> button above
+        </div>
+
+
+        <!-- Table -->
+
+        <div
+            class="table-wrapper"
+            id="tableContainer"
+        >
+
+            <div class="empty">
+
+                <div class="empty-title">
+                    No node data loaded
+                </div>
+
+                <div class="empty-text">
+                    Place <strong>nodes.csv</strong> beside this HTML
+                    file, or choose a CSV file above.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     Node Details Modal
+     ============================================================ -->
+
+<div
+    class="modal-overlay"
+    id="modalOverlay"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2
+                class="modal-title"
+                id="modalTitle"
+            >
+                Node Details
+            </h2>
+
+            <button
+                class="close-button"
+                id="closeModal"
+                title="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <div
+                class="detail-grid"
+                id="detailGrid"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+     * ============================================================
+     * Infrastructure Node Viewer
+     * ============================================================
+     *
+     * Default CSV:
+     *
+     *     nodes.csv
+     *
+     * Expected basic columns:
+     *
+     *     name
+     *     ip
+     *     description
+     *     type
+     *
+     * Additional CSV columns are supported automatically.
+     *
+     * No external libraries are required.
+     *
+     * IP addresses are clickable and open:
+     *
+     *     http://<IP>
+     *
+     * in a new browser tab.
+     * ============================================================
+     */
+
+
+    // ============================================================
+    // Application state
+    // ============================================================
+
+    let nodes = [];
+
+    let currentTab = "all";
+
+    let searchText = "";
+
+    let sortColumn = null;
+
+    let sortDirection = "asc";
+
+
+    // ============================================================
+    // DOM references
+    // ============================================================
+
+    const fileInput =
+        document.getElementById("fileInput");
+
+    const fileName =
+        document.getElementById("fileName");
+
+    const status =
+        document.getElementById("status");
+
+    const tabs =
+        document.getElementById("tabs");
+
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const resultCount =
+        document.getElementById("resultCount");
+
+    const tableContainer =
+        document.getElementById("tableContainer");
+
+    const dropZone =
+        document.getElementById("dropZone");
+
+    const modalOverlay =
+        document.getElementById("modalOverlay");
+
+    const closeModal =
+        document.getElementById("closeModal");
+
+    const modalTitle =
+        document.getElementById("modalTitle");
+
+    const detailGrid =
+        document.getElementById("detailGrid");
+
+
+    // ============================================================
+    // Initialize
+    // ============================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            loadDefaultCSV();
+
+        }
+    );
+
+
+    // ============================================================
+    // Load default nodes.csv
+    // ============================================================
+
+    async function loadDefaultCSV() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "nodes.csv",
+                    {
+                        cache: "no-store"
+                    }
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "nodes.csv could not be loaded."
+                );
+
+            }
+
+            const text =
+                await response.text();
+
+            processCSV(
+                text,
+                "nodes.csv"
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Default CSV could not be loaded:",
+                error
+            );
+
+            fileName.textContent =
+                "No default CSV loaded";
+
+            setStatus(
+                "Default nodes.csv was not found. Choose a CSV file to continue.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+    // ============================================================
+    // File selection
+    // ============================================================
+
+    fileInput.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            readFile(file);
+
+        }
+    );
+
+
+    // ============================================================
+    // Read selected CSV
+    // ============================================================
+
+    function readFile(file) {
+
+        if (
+            !file.name
+                .toLowerCase()
+                .endsWith(".csv")
+        ) {
+
+            setStatus(
+                "Please select a CSV file.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            event => {
+
+                processCSV(
+                    event.target.result,
+                    file.name
+                );
+
+            };
+
+
+        reader.onerror =
+            () => {
+
+                setStatus(
+                    "Unable to read the selected file.",
+                    "error"
+                );
+
+            };
+
+
+        reader.readAsText(file);
+
+    }
+
+
+    // ============================================================
+    // Drag & Drop
+    // ============================================================
+
+    [
+        "dragenter",
+        "dragover"
+    ].forEach(
+        eventName => {
+
+            dropZone.addEventListener(
+                eventName,
+                event => {
+
+                    event.preventDefault();
+
+                    dropZone.classList.add(
+                        "drag-over"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    [
+        "dragleave",
+        "drop"
+    ].forEach(
+        eventName => {
+
+            dropZone.addEventListener(
+                eventName,
+                event => {
+
+                    event.preventDefault();
+
+                    dropZone.classList.remove(
+                        "drag-over"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        "drop",
+        event => {
+
+            const files =
+                event.dataTransfer.files;
+
+            if (!files.length) {
+                return;
+            }
+
+            readFile(files[0]);
+
+        }
+    );
+
+
+    // ============================================================
+    // Process CSV
+    // ============================================================
+
+    function processCSV(
+        text,
+        sourceName
+    ) {
+
+        try {
+
+            const rows =
+                parseCSV(text);
+
+
+            if (!rows.length) {
+
+                throw new Error(
+                    "CSV contains no data."
+                );
+
+            }
+
+
+            const headers =
+                rows[0].map(
+                    header =>
+                        header.trim()
+                );
+
+
+            if (!headers.length) {
+
+                throw new Error(
+                    "CSV header is missing."
+                );
+
+            }
+
+
+            nodes = [];
+
+
+            for (
+                let i = 1;
+                i < rows.length;
+                i++
+            ) {
+
+                const row =
+                    rows[i];
+
+
+                if (
+                    row.every(
+                        value =>
+                            String(value).trim() === ""
+                    )
+                ) {
+
+                    continue;
+
+                }
+
+
+                const node = {};
+
+
+                headers.forEach(
+                    (
+                        header,
+                        index
+                    ) => {
+
+                        node[header] =
+                            row[index] !== undefined
+                                ? row[index].trim()
+                                : "";
+
+                    }
+                );
+
+
+                nodes.push(node);
+
+            }
+
+
+            // Reset view
+
+            currentTab = "all";
+
+            searchText = "";
+
+            searchInput.value = "";
+
+            sortColumn = null;
+
+            sortDirection = "asc";
+
+
+            fileName.textContent =
+                sourceName;
+
+
+            setStatus(
+                `Loaded ${nodes.length} node${nodes.length === 1 ? "" : "s"} from ${sourceName}.`,
+                "success"
+            );
+
+
+            buildTabs();
+
+            renderTable();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            setStatus(
+                "Unable to parse CSV: " +
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+
+
+    // ============================================================
+    // CSV parser
+    //
+    // Supports quoted CSV values, commas inside quotes,
+    // escaped double quotes, CRLF and LF.
+    // ============================================================
+
+    function parseCSV(text) {
+
+        const rows = [];
+
+        let row = [];
+
+        let value = "";
+
+        let insideQuotes = false;
+
+
+        for (
+            let i = 0;
+            i < text.length;
+            i++
+        ) {
+
+            const char =
+                text[i];
+
+            const next =
+                text[i + 1];
+
+
+            if (char === '"') {
+
+                if (
+                    insideQuotes &&
+                    next === '"'
+                ) {
+
+                    value += '"';
+
+                    i++;
+
+                } else {
+
+                    insideQuotes =
+                        !insideQuotes;
+
+                }
+
+            }
+
+            else if (
+                char === "," &&
+                !insideQuotes
+            ) {
+
+                row.push(value);
+
+                value = "";
+
+            }
+
+            else if (
+                (
+                    char === "\n" ||
+                    char === "\r"
+                ) &&
+                !insideQuotes
+            ) {
+
+                if (
+                    char === "\r" &&
+                    next === "\n"
+                ) {
+
+                    i++;
+
+                }
+
+
+                row.push(value);
+
+                value = "";
+
+                rows.push(row);
+
+                row = [];
+
+            }
+
+            else {
+
+                value += char;
+
+            }
+
+        }
+
+
+        if (
+            value.length > 0 ||
+            row.length > 0
+        ) {
+
+            row.push(value);
+
+            rows.push(row);
+
+        }
+
+
+        return rows;
+
+    }
+
+
+    // ============================================================
+    // Find column
+    // ============================================================
+
+    function getColumn(
+        node,
+        candidates
+    ) {
+
+        const keys =
+            Object.keys(node);
+
+
+        for (
+            const candidate of candidates
+        ) {
+
+            const found =
+                keys.find(
+                    key =>
+                        key.trim().toLowerCase() ===
+                        candidate.toLowerCase()
+                );
+
+
+            if (found) {
+
+                return node[found];
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+    // ============================================================
+    // Standard fields
+    // ============================================================
+
+    function getNodeName(node) {
+
+        return getColumn(
+            node,
+            [
+                "name",
+                "node",
+                "node_name",
+                "node name"
+            ]
+        );
+
+    }
+
+
+    function getNodeIP(node) {
+
+        return getColumn(
+            node,
+            [
+                "ip",
+                "ip_address",
+                "ip address",
+                "address"
+            ]
+        );
+
+    }
+
+
+    function getNodeDescription(node) {
+
+        return getColumn(
+            node,
+            [
+                "description",
+                "desc",
+                "details"
+            ]
+        );
+
+    }
+
+
+    function getNodeType(node) {
+
+        return (
+            getColumn(
+                node,
+                [
+                    "type",
+                    "node_type",
+                    "node type",
+                    "category"
+                ]
+            ) || "Other"
+        );
+
+    }
+
+
+    // ============================================================
+    // Build dynamic tabs
+    // ============================================================
+
+    function buildTabs() {
+
+        tabs.innerHTML = "";
+
+
+        // All nodes
+
+        tabs.appendChild(
+            createTab(
+                "all",
+                "All",
+                nodes.length
+            )
+        );
+
+
+        // Count types
+
+        const typeMap =
+            new Map();
+
+
+        nodes.forEach(
+            node => {
+
+                const type =
+                    getNodeType(node)
+                        .trim() ||
+                    "Other";
+
+
+                const key =
+                    type.toLowerCase();
+
+
+                if (!typeMap.has(key)) {
+
+                    typeMap.set(
+                        key,
+                        {
+                            label: type,
+                            count: 0
+                        }
+                    );
+
+                }
+
+
+                typeMap.get(key).count++;
+
+            }
+        );
+
+
+        // Alphabetical order
+
+        const types =
+            Array.from(
+                typeMap.values()
+            ).sort(
+                (a, b) =>
+                    a.label.localeCompare(
+                        b.label
+                    )
+            );
+
+
+        types.forEach(
+            item => {
+
+                const key =
+                    item.label.toLowerCase();
+
+
+                tabs.appendChild(
+                    createTab(
+                        key,
+                        item.label,
+                        item.count
+                    )
+                );
+
+            }
+        );
+
+
+        updateActiveTab();
+
+    }
+
+
+    function createTab(
+        key,
+        label,
+        count
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "tab";
+
+
+        button.dataset.tab =
+            key;
+
+
+        button.innerHTML =
+            `${escapeHTML(label)}
+             <span class="tab-count">
+                 (${count})
+             </span>`;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                currentTab =
+                    key;
+
+                updateActiveTab();
+
+                renderTable();
+
+            }
+        );
+
+
+        return button;
+
+    }
+
+
+    function updateActiveTab() {
+
+        document
+            .querySelectorAll(".tab")
+            .forEach(
+                button => {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.tab ===
+                        currentTab
+                    );
+
+                }
+            );
+
+    }
+
+
+    // ============================================================
+    // Search
+    // ============================================================
+
+    searchInput.addEventListener(
+        "input",
+        event => {
+
+            searchText =
+                event.target.value
+                    .trim()
+                    .toLowerCase();
+
+
+            renderTable();
+
+        }
+    );
+
+
+    // ============================================================
+    // Get filtered nodes
+    // ============================================================
+
+    function getFilteredNodes() {
+
+        let result =
+            nodes.filter(
+                node => {
+
+                    const type =
+                        getNodeType(node)
+                            .trim()
+                            .toLowerCase();
+
+
+                    const tabMatches =
+                        currentTab === "all" ||
+                        type === currentTab;
+
+
+                    if (!tabMatches) {
+                        return false;
+                    }
+
+
+                    if (!searchText) {
+                        return true;
+                    }
+
+
+                    // Search every CSV field
+
+                    return Object
+                        .values(node)
+                        .some(
+                            value =>
+                                String(value)
+                                    .toLowerCase()
+                                    .includes(
+                                        searchText
+                                    )
+                        );
+
+                }
+            );
+
+
+        // Sorting
+
+        if (sortColumn) {
+
+            result.sort(
+                (a, b) => {
+
+                    const av =
+                        String(
+                            a[sortColumn] ?? ""
+                        ).toLowerCase();
+
+
+                    const bv =
+                        String(
+                            b[sortColumn] ?? ""
+                        ).toLowerCase();
+
+
+                    const comparison =
+                        av.localeCompare(
+                            bv,
+                            undefined,
+                            {
+                                numeric: true,
+                                sensitivity: "base"
+                            }
+                        );
+
+
+                    return (
+                        sortDirection === "asc"
+                            ? comparison
+                            : -comparison
+                    );
+
+                }
+            );
+
+        }
+
+
+        return result;
+
+    }
+
+
+    // ============================================================
+    // Render table
+    // ============================================================
+
+    function renderTable() {
+
+        if (!nodes.length) {
+
+            resultCount.textContent =
+                "0 nodes";
+
+
+            tableContainer.innerHTML = `
+                <div class="empty">
+
+                    <div class="empty-title">
+                        No node data loaded
+                    </div>
+
+                    <div class="empty-text">
+                        Choose a CSV file above.
+                    </div>
+
+                </div>
+            `;
+
+
+            return;
+
+        }
+
+
+        const filtered =
+            getFilteredNodes();
+
+
+        resultCount.textContent =
+            `${filtered.length} node${filtered.length === 1 ? "" : "s"}`;
+
+
+        if (!filtered.length) {
+
+            tableContainer.innerHTML = `
+                <div class="empty">
+
+                    <div class="empty-title">
+                        No matching nodes
+                    </div>
+
+                    <div class="empty-text">
+                        Try changing your search or selecting another tab.
+                    </div>
+
+                </div>
+            `;
+
+
+            return;
+
+        }
+
+
+        /*
+         * Determine available columns.
+         *
+         * Standard columns appear first.
+         * Additional CSV columns follow.
+         */
+
+        const preferredColumns = [];
+
+        const allKeys =
+            Object.keys(nodes[0]);
+
+
+        function addColumn(
+            actualKey
+        ) {
+
+            if (
+                actualKey &&
+                !preferredColumns.includes(
+                    actualKey
+                )
+            ) {
+
+                preferredColumns.push(
+                    actualKey
+                );
+
+            }
+
+        }
+
+
+        function findKey(
+            candidates
+        ) {
+
+            return allKeys.find(
+                key =>
+                    candidates.includes(
+                        key.toLowerCase()
+                    )
+            );
+
+        }
+
+
+        addColumn(
+            findKey(
+                [
+                    "name",
+                    "node",
+                    "node_name",
+                    "node name"
+                ]
+            )
+        );
+
+
+        addColumn(
+            findKey(
+                [
+                    "ip",
+                    "ip_address",
+                    "ip address",
+                    "address"
+                ]
+            )
+        );
+
+
+        addColumn(
+            findKey(
+                [
+                    "description",
+                    "desc",
+                    "details"
+                ]
+            )
+        );
+
+
+        addColumn(
+            findKey(
+                [
+                    "type",
+                    "node_type",
+                    "node type",
+                    "category"
+                ]
+            )
+        );
+
+
+        // Additional fields
+
+        allKeys.forEach(
+            key => {
+
+                if (
+                    !preferredColumns.includes(
+                        key
+                    )
+                ) {
+
+                    preferredColumns.push(
+                        key
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Keep the main table readable.
+         * Extra columns remain available in details.
+         */
+
+        const visibleColumns =
+            preferredColumns.slice(
+                0,
+                6
+            );
+
+
+        let html = `
+            <table>
+
+                <thead>
+
+                    <tr>
+        `;
+
+
+        visibleColumns.forEach(
+            column => {
+
+                const arrow =
+                    sortColumn === column
+                        ? (
+                            sortDirection === "asc"
+                                ? " ▲"
+                                : " ▼"
+                        )
+                        : "";
+
+
+                html += `
+                    <th
+                        data-column="${escapeAttribute(column)}"
+                        title="Sort by ${escapeAttribute(column)}"
+                    >
+                        ${escapeHTML(column)}
+                        ${arrow}
+                    </th>
+                `;
+
+            }
+        );
+
+
+        html += `
+                    </tr>
+
+                </thead>
+
+                <tbody>
+        `;
+
+
+        filtered.forEach(
+            node => {
+
+                const nodeIndex =
+                    nodes.indexOf(node);
+
+
+                html += `
+                    <tr
+                        data-node-index="${nodeIndex}"
+                    >
+                `;
+
+
+                visibleColumns.forEach(
+                    column => {
+
+                        const value =
+                            node[column] ?? "";
+
+
+                        const normalized =
+                            column
+                                .toLowerCase()
+                                .replace(
+                                    /[\s_-]/g,
+                                    ""
+                                );
+
+
+                        // ------------------------------------------------
+                        // IP column
+                        // ------------------------------------------------
+
+                        if (
+                            normalized === "ip" ||
+                            normalized === "ipaddress" ||
+                            normalized === "address"
+                        ) {
+
+                            const ip =
+                                String(value)
+                                    .trim();
+
+
+                            if (ip) {
+
+                                html += `
+                                    <td class="ip-address">
+
+                                        <a
+                                            href="http://${escapeAttribute(ip)}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="ip-link"
+                                            title="Open http://${escapeAttribute(ip)} in a new tab"
+                                        >
+                                            ${escapeHTML(ip)}
+                                        </a>
+
+                                    </td>
+                                `;
+
+                            } else {
+
+                                html += `
+                                    <td class="ip-address"></td>
+                                `;
+
+                            }
+
+                        }
+
+
+                        // ------------------------------------------------
+                        // Type column
+                        // ------------------------------------------------
+
+                        else if (
+                            normalized === "type" ||
+                            normalized === "nodetype" ||
+                            normalized === "category"
+                        ) {
+
+                            html += `
+                                <td>
+
+                                    <span class="type-badge">
+                                        ${escapeHTML(
+                                            value || "Other"
+                                        )}
+                                    </span>
+
+                                </td>
+                            `;
+
+                        }
+
+
+                        // ------------------------------------------------
+                        // Name column
+                        // ------------------------------------------------
+
+                        else if (
+                            normalized === "name" ||
+                            normalized === "node" ||
+                            normalized === "nodename"
+                        ) {
+
+                            html += `
+                                <td class="node-name">
+                                    ${escapeHTML(value)}
+                                </td>
+                            `;
+
+                        }
+
+
+                        // ------------------------------------------------
+                        // Other columns
+                        // ------------------------------------------------
+
+                        else {
+
+                            html += `
+                                <td>
+                                    ${escapeHTML(value)}
+                                </td>
+                            `;
+
+                        }
+
+                    }
+                );
+
+
+                html += `
+                    </tr>
+                `;
+
+            }
+        );
+
+
+        html += `
+                </tbody>
+
+            </table>
+        `;
+
+
+        tableContainer.innerHTML =
+            html;
+
+
+        // ========================================================
+        // Sorting handlers
+        // ========================================================
+
+        tableContainer
+            .querySelectorAll("th")
+            .forEach(
+                th => {
+
+                    th.addEventListener(
+                        "click",
+                        () => {
+
+                            const column =
+                                th.dataset.column;
+
+
+                            if (
+                                sortColumn === column
+                            ) {
+
+                                sortDirection =
+                                    sortDirection === "asc"
+                                        ? "desc"
+                                        : "asc";
+
+                            } else {
+
+                                sortColumn =
+                                    column;
+
+                                sortDirection =
+                                    "asc";
+
+                            }
+
+
+                            renderTable();
+
+                        }
+                    );
+
+                }
+            );
+
+
+        // ========================================================
+        // Row click handlers
+        // ========================================================
+
+        tableContainer
+            .querySelectorAll(
+                "tbody tr"
+            )
+            .forEach(
+                row => {
+
+                    row.addEventListener(
+                        "click",
+                        event => {
+
+                            /*
+                             * If the user clicked the IP hyperlink,
+                             * let the browser handle the link.
+                             *
+                             * Do not open the node details dialog.
+                             */
+
+                            if (
+                                event.target.closest("a")
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            const index =
+                                Number(
+                                    row.dataset.nodeIndex
+                                );
+
+
+                            showNodeDetails(
+                                nodes[index]
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    // ============================================================
+    // Show node details
+    // ============================================================
+
+    function showNodeDetails(
+        node
+    ) {
+
+        const name =
+            getNodeName(node) ||
+            "Node Details";
+
+
+        modalTitle.textContent =
+            name;
+
+
+        detailGrid.innerHTML =
+            "";
+
+
+        Object.entries(node)
+            .forEach(
+                (
+                    [key, value]
+                ) => {
+
+                    const label =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    label.className =
+                        "detail-label";
+
+
+                    label.textContent =
+                        key;
+
+
+                    const detail =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    detail.className =
+                        "detail-value";
+
+
+                    /*
+                     * Make the IP clickable inside
+                     * the details window as well.
+                     */
+
+                    const normalized =
+                        key
+                            .toLowerCase()
+                            .replace(
+                                /[\s_-]/g,
+                                ""
+                            );
+
+
+                    if (
+                        normalized === "ip" ||
+                        normalized === "ipaddress" ||
+                        normalized === "address"
+                    ) {
+
+                        const ip =
+                            String(value).trim();
+
+
+                        if (ip) {
+
+                            const link =
+                                document.createElement(
+                                    "a"
+                                );
+
+
+                            link.href =
+                                "http://" + ip;
+
+
+                            link.target =
+                                "_blank";
+
+
+                            link.rel =
+                                "noopener noreferrer";
+
+
+                            link.className =
+                                "ip-link";
+
+
+                            link.textContent =
+                                ip;
+
+
+                            link.title =
+                                "Open " +
+                                ip +
+                                " in a new tab";
+
+
+                            detail.appendChild(
+                                link
+                            );
+
+                        }
+
+                    } else {
+
+                        detail.textContent =
+                            value;
+
+                    }
+
+
+                    detailGrid.appendChild(
+                        label
+                    );
+
+
+                    detailGrid.appendChild(
+                        detail
+                    );
+
+                }
+            );
+
+
+        modalOverlay.classList.add(
+            "show"
+        );
+
+    }
+
+
+    // ============================================================
+    // Close modal
+    // ============================================================
+
+    closeModal.addEventListener(
+        "click",
+        closeDetails
+    );
+
+
+    modalOverlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                modalOverlay
+            ) {
+
+                closeDetails();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeDetails();
+
+            }
+
+        }
+    );
+
+
+    function closeDetails() {
+
+        modalOverlay.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    // ============================================================
+    // Status message
+    // ============================================================
+
+    function setStatus(
+        message,
+        type = ""
+    ) {
+
+        status.textContent =
+            message;
+
+
+        status.className =
+            "status " + type;
+
+    }
+
+
+    // ============================================================
+    // HTML escaping
+    // ============================================================
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(value)
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+    }
+
+
+    function escapeAttribute(
+        value
+    ) {
+
+        return escapeHTML(value);
+
+    }
+
+</script>
+
+</body>
+</html>
