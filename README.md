@@ -1,6 +1,6 @@
 
 Standalone webapp to list all managed devices in an integrated and organized way. For HPC data center, you can put managed UPS, PDU, Switch, storage servers, JBOD chassis, etc into a single web page. 
-It works kind of like a property management system, and most importantly gives admins a single entry to manage all critical devices.
+It works kind of like a property management system, and most importantly gives admins an integrated interface to manage all critical devices.
 
 Put all the nodes information in a CSV file, by default: nodes.csv. You can also open any CSV files, once they have the format of:
 ~~~
