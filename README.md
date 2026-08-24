@@ -14,9 +14,9 @@ You can also start light-weighted web service as a regular user, on a Linux box,
 >python3 -m http.server 8​111 --bind 127.0.0.1
 ~~~
 
-Bind it to an internal net work, to keep it away from outside access, for the sake of security.
+Bind it to an internal network, to keep it away from outside access, for the sake of security.
 
-User web browser to open: 
+Use a web browser to open: 
 ```
 http://127.0.0.1:8111/
 ```
