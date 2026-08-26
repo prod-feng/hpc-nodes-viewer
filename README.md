@@ -23,6 +23,17 @@ Use a web browser to open:
 ```
 http://127.0.0.1:8111/
 ```
+Or run the script:
+
+```
+
+./run_me.sh start
+
+./run_me.sh status
+
+./run_me.sh stop
+```
+
 
  <img width="1532" height="663" alt="node-viewer" src="https://github.com/user-attachments/assets/2a99aa28-c5ea-4590-acb6-e795a56c2c50" />
 
